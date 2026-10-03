@@ -19,10 +19,12 @@ import {
   Zap, 
   Globe,
   Play,
-  Server
+  Server,
+  Share2
 } from 'lucide-react';
 import { AI_APPS, CATEGORIES, AIApp } from '../data/apps';
 import QuickStartModal from './components/QuickStartModal';
+import SocialPublisherModal from './components/SocialPublisherModal';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +32,7 @@ export default function HomePage() {
   const [onlyWithDemos, setOnlyWithDemos] = useState(false);
   const [onlyLocalRepo, setOnlyLocalRepo] = useState(false);
   const [selectedAppForLaunch, setSelectedAppForLaunch] = useState<AIApp | null>(null);
+  const [isSocialPublisherOpen, setIsSocialPublisherOpen] = useState(false);
 
   // Profit Calculator State
   const [userCount, setUserCount] = useState<number>(100);
@@ -99,6 +102,22 @@ export default function HomePage() {
             <DollarSign size={16} />
             <span>Profit Calc</span>
           </a>
+          <button
+            onClick={() => setIsSocialPublisherOpen(true)}
+            className="btn-ghost"
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '0.45rem', 
+              border: '1px solid rgba(99, 102, 241, 0.35)', 
+              background: 'rgba(99, 102, 241, 0.12)',
+              cursor: 'pointer' 
+            }}
+            title="Universal Social Publisher for TikTok, Instagram, YouTube, X, LinkedIn, Facebook & 6+ more via Upload-Post API"
+          >
+            <Share2 size={16} className="text-indigo-400" />
+            <span>Social Publisher</span>
+          </button>
           <a 
             href="#quickstart" 
             className="btn-primary"
@@ -131,12 +150,20 @@ export default function HomePage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap', margin: '1.25rem auto 1.75rem', maxWidth: '850px', padding: '0.6rem 1.25rem', background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)', borderRadius: '12px', boxShadow: '0 4px 20px rgba(99, 102, 241, 0.1)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700, color: '#e0e7ff' }}>
               <Cpu size={16} style={{ color: 'var(--primary)' }} />
-              <span>Model Routers on File:</span>
+              <span>Model & Distribution Routers:</span>
             </div>
             <span className="status-pill ready" title="NVIDIA NIM API Router via MY_MODEL_API_KEY">⚡ NVIDIA NIM</span>
             <span className="status-pill online" title="Local LM Studio at http://localhost:1234/v1">🖥️ LM Studio (Local)</span>
             <span className="status-pill online" title="Local Ollama at http://localhost:11434/v1">🦙 Ollama (Local)</span>
             <span className="status-pill ready" title="Google Gemini 2.0 Flash API">✨ Gemini 2.0</span>
+            <span 
+              className="status-pill online" 
+              style={{ cursor: 'pointer' }}
+              onClick={() => setIsSocialPublisherOpen(true)}
+              title="Upload-Post Universal Social Media API (12+ networks)"
+            >
+              📡 Upload-Post API
+            </span>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginLeft: '0.25rem' }}>
               — Click any app below for 1-Click Launch & Deploy
             </span>
@@ -567,6 +594,12 @@ npm run dev
           onClose={() => setSelectedAppForLaunch(null)} 
         />
       )}
+
+      {/* Universal Upload-Post Social Media Publisher Modal */}
+      <SocialPublisherModal 
+        isOpen={isSocialPublisherOpen} 
+        onClose={() => setIsSocialPublisherOpen(false)} 
+      />
     </>
   );
 }

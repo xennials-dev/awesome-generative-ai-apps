@@ -89,6 +89,8 @@ The margin is high because you're reselling AI compute. The hard parts — billi
 - 💳 **Stripe checkout + webhooks** — users buy credits, Stripe pays you, credits unlock on webhook confirmation
 - 🔐 **Google OAuth** — no auth to build or maintain
 - 🤖 **100+ AI models** via [MuAPI](https://muapi.ai?utm_source=github&utm_medium=readme&utm_campaign=awesome-generative-ai-apps) — swap models without touching app code; MuAPI handles async polling, retries, and failover
+- 🖥️ **Local LM Studio Integration** — pre-wired router for local open-source models (`http://127.0.0.1:1234/v1`) with zero token costs
+- 📡 **Universal Social Publisher via Upload-Post** — 1-click publishing across 12+ social networks (TikTok, Instagram, YouTube Shorts, X, LinkedIn, Facebook, Threads, Pinterest, Bluesky, Google Business) with AI caption synthesis and scheduling
 - 🌐 **Vercel-ready** — one `Deploy` button and it's live on a CDN
 - 🗄️ **Prisma + PostgreSQL** — user accounts, credit balances, and job history out of the box
 - 🆓 **MIT licensed** — sell it, white-label it, charge whatever you want
