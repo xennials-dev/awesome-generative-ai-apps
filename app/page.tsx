@@ -9,23 +9,27 @@ import {
   TrendingUp, 
   DollarSign, 
   Layers, 
-  ArrowUpRight,
-  Terminal,
-  CheckCircle2,
-  RefreshCw,
-  FolderGit2,
-  Cpu,
-  ShieldCheck,
-  Zap,
-  Globe
+  ArrowUpRight, 
+  Terminal, 
+  CheckCircle2, 
+  RefreshCw, 
+  FolderGit2, 
+  Cpu, 
+  ShieldCheck, 
+  Zap, 
+  Globe,
+  Play,
+  Server
 } from 'lucide-react';
 import { AI_APPS, CATEGORIES, AIApp } from '../data/apps';
+import QuickStartModal from './components/QuickStartModal';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [onlyWithDemos, setOnlyWithDemos] = useState(false);
   const [onlyLocalRepo, setOnlyLocalRepo] = useState(false);
+  const [selectedAppForLaunch, setSelectedAppForLaunch] = useState<AIApp | null>(null);
 
   // Profit Calculator State
   const [userCount, setUserCount] = useState<number>(100);
@@ -122,6 +126,21 @@ export default function HomePage() {
             Turnkey open-source generative AI business templates with Stripe billing, Google OAuth, 
             Prisma database, and 100+ AI models wired up. Deploy to Vercel in seconds.
           </p>
+
+          {/* Unified Model Router Status Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap', margin: '1.25rem auto 1.75rem', maxWidth: '850px', padding: '0.6rem 1.25rem', background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)', borderRadius: '12px', boxShadow: '0 4px 20px rgba(99, 102, 241, 0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700, color: '#e0e7ff' }}>
+              <Cpu size={16} style={{ color: 'var(--primary)' }} />
+              <span>Model Routers on File:</span>
+            </div>
+            <span className="status-pill ready" title="NVIDIA NIM API Router via MY_MODEL_API_KEY">⚡ NVIDIA NIM</span>
+            <span className="status-pill online" title="Local LM Studio at http://localhost:1234/v1">🖥️ LM Studio (Local)</span>
+            <span className="status-pill online" title="Local Ollama at http://localhost:11434/v1">🦙 Ollama (Local)</span>
+            <span className="status-pill ready" title="Google Gemini 2.0 Flash API">✨ Gemini 2.0</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginLeft: '0.25rem' }}>
+              — Click any app below for 1-Click Launch & Deploy
+            </span>
+          </div>
 
           <div className="hero-metrics">
             <div className="metric-card">
@@ -364,7 +383,12 @@ export default function HomePage() {
         {/* Apps Grid */}
         <section className="apps-grid">
           {filteredApps.map((app) => (
-            <div key={app.id} className="app-card">
+            <div 
+              key={app.id} 
+              className="app-card"
+              onClick={() => setSelectedAppForLaunch(app)}
+              style={{ cursor: 'pointer' }}
+            >
               <div>
                 <div className="card-top">
                   <span className="card-category-badge">{app.categoryLabel}</span>
@@ -402,11 +426,16 @@ export default function HomePage() {
 
                 <div className="card-footer">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {app.hasLocalCode && (
-                      <span title={app.localPath} style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
-                        📂 {app.localPath?.split('/')[1] || app.localPath}
-                      </span>
-                    )}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedAppForLaunch(app);
+                      }}
+                      className="btn-card-launch"
+                    >
+                      <Play size={12} />
+                      <span>Run & Deploy</span>
+                    </button>
                   </div>
 
                   <div className="card-links">
@@ -415,6 +444,7 @@ export default function HomePage() {
                         href={app.demoUrl} 
                         target="_blank" 
                         rel="noopener noreferrer" 
+                        onClick={(e) => e.stopPropagation()}
                         className="btn-card-demo"
                       >
                         <Globe size={13} />
@@ -425,6 +455,7 @@ export default function HomePage() {
                       href={app.githubUrl} 
                       target="_blank" 
                       rel="noopener noreferrer" 
+                      onClick={(e) => e.stopPropagation()}
                       className="btn-card-gh"
                     >
                       <Github size={13} />
@@ -528,6 +559,14 @@ npm run dev
           </p>
         </footer>
       </main>
+
+      {/* Interactive Quick Start & Deploy Modal */}
+      {selectedAppForLaunch && (
+        <QuickStartModal 
+          app={selectedAppForLaunch} 
+          onClose={() => setSelectedAppForLaunch(null)} 
+        />
+      )}
     </>
   );
 }

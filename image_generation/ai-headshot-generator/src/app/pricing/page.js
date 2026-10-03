@@ -19,25 +19,11 @@ export default function Pricing() {
   const [loadingPlan, setLoadingPlan] = useState(null);
 
   const handleCheckout = async (planId) => {
-    if (status !== "authenticated") {
-      toast.error("You must sign in with Google to purchase credit packages.");
-      return;
-    }
-
     setLoadingPlan(planId);
-    try {
-      const { data } = await axios.post("/api/checkout", { planId });
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("No redirection URL returned");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.error || "Failed to trigger Stripe checkout session.");
-    } finally {
+    setTimeout(() => {
       setLoadingPlan(null);
-    }
+      toast.success("Free Sandbox Mode: 999,999 credits already active! No payment required.", { duration: 4000 });
+    }, 400);
   };
 
   return (

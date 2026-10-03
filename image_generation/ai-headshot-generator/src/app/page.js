@@ -159,11 +159,6 @@ export default function Home() {
       return;
     }
 
-    if (!session) {
-      signIn();
-      return;
-    }
-
     if (file.size > 5 * 1024 * 1024) {
       setError("File size exceeds 5MB limit.");
       return;
@@ -197,11 +192,6 @@ export default function Home() {
   };
 
   const handleGenerate = async () => {
-    if (!session) {
-      signIn();
-      return;
-    }
-
     if (!referenceImage && !newImageUrl) {
       setError("Please provide a reference image.");
       return;
@@ -358,9 +348,7 @@ export default function Home() {
                     onChange={handleFileUpload}
                   />
                   <button
-                    onClick={() =>
-                      session ? fileInputRef.current?.click() : signIn()
-                    }
+                    onClick={() => fileInputRef.current?.click()}
                     className="w-10 h-10 bg-primary-500/10 border border-primary-500/10 text-primary-500 rounded-lg flex items-center justify-center hover:bg-primary-500 hover:text-white transition-all shadow-sm group"
                   >
                     {isUploading ? (

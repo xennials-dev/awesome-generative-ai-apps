@@ -1,26 +1,28 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
 
+export const DEFAULT_USER = {
+  id: "dev-user",
+  name: "Guest Creator",
+  email: "guest@localhost",
+  credits: 999999,
+  image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
+};
+
+export const DEFAULT_SESSION = {
+  user: DEFAULT_USER,
+  expires: "2099-01-01T00:00:00.000Z"
+};
+
 export const authOptions = {
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
+  providers: [],
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-        session.user.credits = user.credits;
-      }
+    async session({ session }) {
+      session.user = DEFAULT_USER;
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "awesome_ai_apps_default_secret_key_12345",
   pages: {
-    signIn: "/login",
+    signIn: "/",
   },
 };

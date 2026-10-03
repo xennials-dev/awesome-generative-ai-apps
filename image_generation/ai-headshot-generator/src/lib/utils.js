@@ -1,211 +1,243 @@
 /**
- * Utility to download a remote image using fetch.
- * This converts the image to a blob and triggers a browser download.
+ * Utility to download an image seamlessly without throwing uncaught errors.
+ * Supports data URLs, blob URLs, direct CORS fetch, and server proxy fallback.
  */
 export async function downloadImage(url, filename = "ai-headshot-portrait.jpg") {
+  if (!url) return;
+
+  // Case 1: Data URL or Blob URL (e.g. locally processed canvas or uploaded photo)
+  if (url.startsWith("data:") || url.startsWith("blob:")) {
+    try {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    } catch (e) {
+      console.warn("Direct blob/data download failed:", e);
+    }
+  }
+
+  // Case 2: Attempt standard browser fetch to create local ObjectURL
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch image");
-    
-    const blob = await response.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    
+    const response = await fetch(url, { mode: "cors" });
+    if (response && response.ok) {
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      return;
+    }
+  } catch (error) {
+    // Proceed to server proxy fallback without throwing
+  }
+
+  // Case 3: Robust Server-Side Proxy Fallback (bypasses browser CORS & CDN 403 errors)
+  try {
+    const proxyUrl = `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
     const link = document.createElement("a");
-    link.href = objectUrl;
+    link.href = proxyUrl;
     link.download = filename;
-    
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    // Clean up the object URL
-    URL.revokeObjectURL(objectUrl);
   } catch (error) {
-    console.error("Download failed:", error);
-    // Fallback: target blank if fetch fails
-    window.open(url, "_blank");
+    console.warn("Download proxy fallback:", error);
+    // Ultimate fallback: open in new tab
+    if (typeof window !== "undefined") {
+      window.open(url, "_blank");
+    }
   }
 }
 
 export const headshotsExamples = [
   {
     "name": "LinkedIn",
-    "url": "https://cdn.muapi.ai/outputs/d09a771a8b2a45f1b0b5e6aba5955f1b.jpg"
+    "url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Tinder",
-    "url": "https://cdn.muapi.ai/outputs/23a2914038de40d3b3bc8c8b3a5a108a.jpg"
+    "url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Bumble",
-    "url": "https://cdn.muapi.ai/outputs/67b9e5df060a4ec08c8a0d6244370781.jpg"
+    "url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "OldMoney",
-    "url": "https://cdn.muapi.ai/outputs/00436b9b658a474aa337380c6850cd5d.jpg"
+    "url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Cyberpunk",
-    "url": "https://cdn.muapi.ai/outputs/e297958d8a9b4f5c9937435a87b8fff2.jpg"
+    "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "CEO",
-    "url": "https://cdn.muapi.ai/outputs/1f6f689a5338409f984d4bc705a6fdd9.jpg"
+    "url": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "CleanGirl",
-    "url": "https://cdn.muapi.ai/outputs/ab5400bef83548198f3cad252abd9f49.jpg"
+    "url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "DarkAcademia",
-    "url": "https://cdn.muapi.ai/outputs/79258cd108ea42bd9418f08286623827.jpg"
+    "url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Anime",
-    "url": "https://cdn.muapi.ai/outputs/1343723e9655485e95a71ba55b652732.jpg"
+    "url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Doctor",
-    "url": "https://cdn.muapi.ai/outputs/a462e75109b840d999b61f2345b82707.jpg"
+    "url": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Lawyer",
-    "url": "https://cdn.muapi.ai/outputs/64c27c401766492982daa19924ff8de6.jpg"
+    "url": "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "MobWife",
-    "url": "https://cdn.muapi.ai/outputs/1f986889ebcd418994fd924db9bde486.jpg"
+    "url": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Bali",
-    "url": "https://cdn.muapi.ai/outputs/bf8ee4e0f6cb48bdac8dede04faf9eaf.jpg"
+    "url": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "90s",
-    "url": "https://cdn.muapi.ai/outputs/90c7378f358f4d4693ab27e8914137b1.jpg"
+    "url": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Fitness",
-    "url": "https://cdn.muapi.ai/outputs/29bbbbdee7fb4e17a229f3222a63b46f.jpg"
+    "url": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Christmas",
-    "url": "https://cdn.muapi.ai/outputs/882282c4e3034301b86ac42db2f4d8ac.jpg"
+    "url": "https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Halloween",
-    "url": "https://cdn.muapi.ai/outputs/71566fb951b145f89baec601a4b72330.jpg"
+    "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "EuropeanElegance",
-    "url": "https://cdn.muapi.ai/outputs/31cadd8a2fca4a738b37af30fc3af869.jpg"
+    "url": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "ChampionSportsMoment",
-    "url": "https://cdn.muapi.ai/outputs/699a944dec0f4be194c929ae9c6e30fc.jpg"
+    "url": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "JobSwapDaydream",
-    "url": "https://cdn.muapi.ai/outputs/5f54966658b24288b6a5779c8839f000.jpg"
+    "url": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "TravelTheWorld",
-    "url": "https://cdn.muapi.ai/outputs/ef12fb4afcba4947aebc2a15cce4d643.jpg"
+    "url": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "DatingPack",
-    "url": "https://cdn.muapi.ai/outputs/2b243dccee68482ca92a1310b4cfd9b4.jpg"
+    "url": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "FlashPosePerfection",
-    "url": "https://cdn.muapi.ai/outputs/3ed0f6e9f2b74897b39c4161a21b2467.jpg"
+    "url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "CapAndGown",
-    "url": "https://cdn.muapi.ai/outputs/af3729fd8a2d44ab8a59225d88f38b01.jpg"
+    "url": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "CorporateBoss",
-    "url": "https://cdn.muapi.ai/outputs/ce4a7ea97c96466bbaecc9a78653f64b.jpg"
+    "url": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "RocknRollLuxury",
-    "url": "https://cdn.muapi.ai/outputs/42cb61124d6243fca8cc2802628dc908.jpg"
+    "url": "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "TheBigWeddingDay",
-    "url": "https://cdn.muapi.ai/outputs/20f20a2a827a4f0399e5b68a6f3f110c.jpg"
+    "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "RusticCharm",
-    "url": "https://cdn.muapi.ai/outputs/54e862934a354d12a696b1e66d4376ab.jpg"
+    "url": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "DressedToImpress",
-    "url": "https://cdn.muapi.ai/outputs/191f0a8fe8084aa89fee23091624b413.jpg"
+    "url": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "IdentificationPhoto",
-    "url": "https://cdn.muapi.ai/outputs/67481217ae404c468dec7e66e4006eda.jpg"
+    "url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "DontMissYourProm",
-    "url": "https://cdn.muapi.ai/outputs/8a0899769c604d9c9cb4123a98f65a73.jpg"
+    "url": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "GoddessOfNature",
-    "url": "https://cdn.muapi.ai/outputs/de5b23abfe2a4de4a70dde6f68ab2f0a.jpg"
+    "url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "BlackAndWhiteMagic",
-    "url": "https://cdn.muapi.ai/outputs/6d608b9a2f704fd0b838abacb86b1bfe.jpg"
+    "url": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "HomelyComforts",
-    "url": "https://cdn.muapi.ai/outputs/1246c25531794393be3522b44b02e539.jpg"
+    "url": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "BalloonsBalloonsBalloons",
-    "url": "https://cdn.muapi.ai/outputs/ff07089729954a4290c92b7e7b7fc913.jpg"
+    "url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "BeautyBlooms",
-    "url": "https://cdn.muapi.ai/outputs/c148257850ab4eada3718faa36ec217e.jpg"
+    "url": "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "SuperheroAdventure",
-    "url": "https://cdn.muapi.ai/outputs/68d4dcd0386b42ef823e9ff87740921a.jpg"
+    "url": "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "BoldFashionStatements",
-    "url": "https://cdn.muapi.ai/outputs/547a4b9e5b3d4530ae30074c3cf8455f.jpg"
+    "url": "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "FantasyOutfits",
-    "url": "https://cdn.muapi.ai/outputs/10f7a2fe209b4742b4abab13af91e3fb.jpg"
+    "url": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "OnTheCatwalk",
-    "url": "https://cdn.muapi.ai/outputs/f5126fd4ccf444b49215c7e4cdf63d17.jpg"
+    "url": "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "HalloweenHorror",
-    "url": "https://cdn.muapi.ai/outputs/b10e9bb9909b414c9086f95febf5d13e.jpg"
+    "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "CosplayGalore",
-    "url": "https://cdn.muapi.ai/outputs/dd7e06831bfc4df18ad16c24fed622be.jpg"
+    "url": "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Ghibli",
-    "url": "https://cdn.muapi.ai/outputs/0f65ed91d9ee45808e5688333c75a2fa.jpg"
+    "url": "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "Pixar",
-    "url": "https://cdn.muapi.ai/outputs/eee5f7fd1e144548ba2783c9f60c5c72.jpg"
+    "url": "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&q=80&w=800"
   },
   {
     "name": "SpiderVerse",
-    "url": "https://cdn.muapi.ai/outputs/efa8c22dcb05465d9a8b4859f82aca15.jpg"
+    "url": "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&q=80&w=800"
   }
-]
+];
